@@ -84,10 +84,28 @@ var TrackList = React.createClass({
  * Single Track
  */
 var Track = React.createClass({
+	generatePlayerURL: function() {
+
+	},
 	render: function() {
 		return (
 			<li className="track">
-				{this.props.data.title}
+				<div className="track-artwork">
+					<img src={this.props.data.artwork_url} />
+				</div>
+				<div className="track-info">
+					<h3>
+						<span className="track-title">
+							{this.props.data.title}
+						</span>
+						<span className="artist-name">
+							<a href="#">{this.props.data.user.username}</a>
+						</span>
+					</h3>
+				</div>
+				<div className="player">
+					<iframe width="100%" height="166" scrolling="no" src={"http://w.soundcloud.com/player/?url=http%3A%2F%2Fapi.soundcloud.com%2Ftracks%2F" + this.props.data.id + "&auto_play=false&show_artwork=false&&show_comments=false&show_playcount=false&buying=false"} frameBorder="0" ></iframe>
+				</div>
 			</li>
 		)
 	}
