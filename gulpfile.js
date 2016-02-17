@@ -16,7 +16,7 @@ gulp.task('server', function() {
 // Watch
 gulp.task('watch', function () {
   gulp.watch(
-    ['./scripts/*js']
+    ['scripts/*.js']
   );
 });
 
