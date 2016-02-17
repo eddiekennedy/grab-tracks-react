@@ -1,7 +1,11 @@
+/**
+ * Application Settings
+ */
 var app = {};
 app.apiRoot = 'https://api.soundcloud.com';
 app.clientId = 'f652822b93b6a6799336b4a729d50de8';
 app.query = 'diplo';
+
 app.apiEndpoint = function() {
 	return [
 		app.apiRoot,
@@ -13,8 +17,11 @@ app.apiEndpoint = function() {
 		'&limit=10',
 		//"&offset=" + this.offset
 	].join('');
-}
+};
 
+/**
+ * Grab Tracks
+ */
 var GrabTracks = React.createClass({
 	loadTracksFromSoundCloud: function() {
 		var request = new XMLHttpRequest();
@@ -23,7 +30,8 @@ var GrabTracks = React.createClass({
 		// Success
 		request.onload = function() {
 			if ( request.status >= 200 && request.status < 400 ) {
-				this.setState({ data: request.responseText });
+				console.log("RESPONSE", JSON.parse( request.responseText ) );
+				this.setState({ data: JSON.parse( request.responseText ) });
 			} else {
 				console.error('Server error. Status: ' + request.status);
 			}
@@ -39,36 +47,53 @@ var GrabTracks = React.createClass({
 	componentDidMount: function() {
 		this.loadTracksFromSoundCloud();
 	},
+	getInitialState: function() {
+		return { data: [] }
+	},
 	render: function() {
 		return (
 			<div className="grab-tracks">
 				<h1>Grab Tracks</h1>
-				<TrackList />
+				<TrackList data={this.state.data} />
 			</div>
 		)
 	}
 });
 
+/**
+ * Track List
+ */
 var TrackList = React.createClass({
 	render: function() {
+
+    var trackNodes = this.props.data.map(function(track) {
+      return (
+        <Track key={track.id} data={track} />
+      )
+    });
+
 		return (
 			<ul className="track-list">
-				<Track />
+				{trackNodes}
 			</ul>
 		)
 	}
 });
 
+/**
+ * Single Track
+ */
 var Track = React.createClass({
 	render: function() {
 		return (
 			<li className="track">
-				Track
+				{this.props.data.title}
 			</li>
 		)
 	}
 });
 
+// Render the ReactDOM
 ReactDOM.render(
   <GrabTracks url={ app.apiEndpoint() } />,
   document.getElementById('app')
