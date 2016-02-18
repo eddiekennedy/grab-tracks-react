@@ -4,67 +4,100 @@
 var app = {};
 app.apiRoot = 'https://api.soundcloud.com';
 app.clientId = 'f652822b93b6a6799336b4a729d50de8';
-app.query = 'diplo';
 
-app.apiEndpoint = function() {
-	return [
-		app.apiRoot,
-		'/tracks.json',
-		'?client_id=' + app.clientId,
-		'&q=' + app.query,
-		'&filter=downloadable',
-		//"&duration[" + toOrFrom + "]=600000",
-		'&limit=10',
-		//"&offset=" + this.offset
-	].join('');
+app.APIEndpoint = function( query ) {
+  return [
+    app.apiRoot,
+    '/tracks.json',
+    '?client_id=' + app.clientId,
+    '&q=' + query.query,
+    '&filter=downloadable',
+    //"&duration[" + toOrFrom + "]=600000",
+    '&limit=10',
+    //"&offset=" + this.offset
+  ].join('');
 };
 
 /**
  * Grab Tracks
  */
 var GrabTracks = React.createClass({
-	loadTracksFromSoundCloud: function() {
-		var request = new XMLHttpRequest();
-		request.open('GET', this.props.url, true);
+  loadTracksFromSoundCloud: function(query) {
+    var request = new XMLHttpRequest();
+    request.open('GET', app.APIEndpoint( query ), true);
 
-		// Success
-		request.onload = function() {
-			if ( request.status >= 200 && request.status < 400 ) {
-				console.log("RESPONSE", JSON.parse( request.responseText ) );
-				this.setState({ data: JSON.parse( request.responseText ) });
-			} else {
-				console.error('Server error. Status: ' + request.status);
-			}
-		}.bind(this);
+    // Success
+    request.onload = function() {
+      if ( request.status >= 200 && request.status < 400 ) {
+        console.log("RESPONSE", JSON.parse( request.responseText ) );
+        this.setState({ data: JSON.parse( request.responseText ) });
+      } else {
+        console.error('Server error. Status: ' + request.status);
+      }
+    }.bind(this);
 
-		// Error
-		request.onerror = function() {
-			console.error('Connection error.');
-		}.bind(this);
+    // Error
+    request.onerror = function() {
+      console.error('Connection error.');
+    }.bind(this);
 
-		request.send();
-	},
-	componentDidMount: function() {
-		this.loadTracksFromSoundCloud();
-	},
-	getInitialState: function() {
-		return { data: [] }
-	},
-	render: function() {
-		return (
-			<div className="grab-tracks">
-				<h1>Grab Tracks</h1>
-				<TrackList data={this.state.data} />
-			</div>
-		)
-	}
+    request.send();
+  },
+  handleQuerySubmit: function(query) {
+    this.loadTracksFromSoundCloud(query);
+  },
+  getInitialState: function() {
+    return { data: [] }
+  },
+  render: function() {
+    return (
+      <div className="grab-tracks">
+        <h1>Grab Tracks</h1>
+        <SearchForm onQuerySubmit={this.handleQuerySubmit} />
+        <TrackList data={this.state.data} />
+      </div>
+    )
+  }
+});
+
+/**
+ * Search Form
+ */
+ var SearchForm = React.createClass({
+  getInitialState: function() {
+    return { query: '' };
+  },
+  handleQueryChange: function(event) {
+    this.setState({ query: event.target.value });
+  },
+  handleSubmit: function(event) {
+    event.preventDefault();
+    var query = this.state.query.trim();
+    if ( !query ) {
+      return;
+    }
+    this.props.onQuerySubmit({ query: query });
+  },
+  render: function() {
+    return (
+      <form className="search-form" onSubmit={this.handleSubmit}>
+        <input 
+          type="text"
+          placeholder="Search"
+          value={this.state.query}
+          onChange={this.handleQueryChange}
+        />
+        <input type="submit" value="Post" />
+      </form>
+    )
+  }
 });
 
 /**
  * Track List
  */
 var TrackList = React.createClass({
-	render: function() {
+  render: function() {
 
     var trackNodes = this.props.data.map(function(track) {
       return (
@@ -72,48 +105,35 @@ var TrackList = React.createClass({
       )
     });
 
-		return (
-			<ul className="track-list">
-				{trackNodes}
-			</ul>
-		)
-	}
+    return (
+      <ul className="track-list">
+        {trackNodes}
+      </ul>
+    )
+  }
 });
 
 /**
  * Single Track
  */
 var Track = React.createClass({
-	generatePlayerURL: function() {
+  generatePlayerURL: function() {
 
-	},
-	render: function() {
-		return (
-			<li className="track">
-				<div className="track-artwork">
-					<img src={this.props.data.artwork_url} />
-				</div>
-				<div className="track-info">
-					<h3>
-						<span className="track-title">
-							{this.props.data.title}
-						</span>
-						<span className="artist-name">
-							<a href="#">{this.props.data.user.username}</a>
-						</span>
-					</h3>
-				</div>
-				<div className="player">
-					<iframe width="100%" height="166" scrolling="no" src={"http://w.soundcloud.com/player/?url=http%3A%2F%2Fapi.soundcloud.com%2Ftracks%2F" + this.props.data.id + "&auto_play=false&show_artwork=false&&show_comments=false&show_playcount=false&buying=false"} frameBorder="0" ></iframe>
-				</div>
-			</li>
-		)
-	}
+  },
+  render: function() {
+    return (
+      <li className="track">
+        <div className="player">
+          <iframe width="100%" height="166" scrolling="no" src={"http://w.soundcloud.com/player/?url=http%3A%2F%2Fapi.soundcloud.com%2Ftracks%2F" + this.props.data.id + "&auto_play=false&show_artwork=true&&show_comments=false&show_playcount=false&buying=true"} frameBorder="0" ></iframe>
+        </div>
+      </li>
+    )
+  }
 });
 
 // Render the ReactDOM
 ReactDOM.render(
-  <GrabTracks url={ app.apiEndpoint() } />,
+  <GrabTracks />,
   document.getElementById('app')
 );
 
