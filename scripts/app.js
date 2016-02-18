@@ -56,9 +56,9 @@ var GrabTracks = React.createClass({
     return (
       <div className="grab-tracks">
         <h1>Grab Tracks</h1>
-        <SearchForm onQuerySubmit={this.handleQuerySubmit} query={this.state.query} />
+        <SearchForm onQuerySubmit={this.handleQuerySubmit} parentState={this.state} />
         <TrackList data={this.state.data} />
-        <Pagination onPaginate={this.handlePaginate} offset={this.state.offset}/>
+        <Pagination onPaginate={this.handlePaginate} parentState={this.state}/>
       </div>
     )
   }
@@ -69,7 +69,7 @@ var GrabTracks = React.createClass({
  */
 var SearchForm = React.createClass({
   getInitialState: function() {
-    return { query: this.props.query };
+    return { query: this.props.parentState.query };
   },
   handleQueryChange: function(event) {
     this.setState({ query: event.target.value });
@@ -146,7 +146,7 @@ var Track = React.createClass({
  */
 var Pagination = React.createClass({
   getInitialState: function() {
-    return { offset: this.props.offset }
+    return { offset: this.props.parentState.offset }
   },
   handlePaginate( event ) {
     event.preventDefault();
