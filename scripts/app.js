@@ -1,30 +1,27 @@
 /**
- * Application Settings
- */
-var app = {};
-app.apiRoot = 'https://api.soundcloud.com';
-app.clientId = 'f652822b93b6a6799336b4a729d50de8';
-
-app.APIEndpoint = function( query ) {
-  return [
-    app.apiRoot,
-    '/tracks.json',
-    '?client_id=' + app.clientId,
-    '&q=' + query.query,
-    '&filter=downloadable',
-    //"&duration[" + toOrFrom + "]=600000",
-    '&limit=10',
-    //"&offset=" + this.offset
-  ].join('');
-};
-
-/**
  * Grab Tracks
  */
 var GrabTracks = React.createClass({
-  loadTracksFromSoundCloud: function(query) {
+
+  clientId: 'f652822b93b6a6799336b4a729d50de8',
+  apiRoot: 'https://api.soundcloud.com',
+
+  apiEndpoint: function() {
+    console.log("STATE ", this.state);
+    return [
+      this.apiRoot,
+      '/tracks.json',
+      '?client_id=' + this.clientId,
+      '&q=' + this.state.query,
+      '&filter=downloadable',
+      //"&duration[" + toOrFrom + "]=600000",
+      '&limit=10',
+      '&offset=' + this.state.offset
+    ].join('');
+  },
+  loadTracksFromSoundCloud: function() {
     var request = new XMLHttpRequest();
-    request.open('GET', app.APIEndpoint( query ), true);
+    request.open('GET', this.apiEndpoint(), true);
 
     // Success
     request.onload = function() {
@@ -43,19 +40,27 @@ var GrabTracks = React.createClass({
 
     request.send();
   },
-  handleQuerySubmit: function(query) {
-    this.loadTracksFromSoundCloud(query);
+  handleQuerySubmit: function( query ) {
+    this.setState({ query: query.query, offset: 0 }, function() {
+      this.loadTracksFromSoundCloud();
+    });
+  },
+  handlePaginate( offset ) {
+    this.setState({ offset: offset.offset }, function() {
+      this.loadTracksFromSoundCloud();
+    });
   },
   getInitialState: function() {
-    return { data: [] }
+    console.log("GET INITIAL STATE");
+    return { data: [], query: '', offset: 0 };
   },
   render: function() {
     return (
       <div className="grab-tracks">
         <h1>Grab Tracks</h1>
-        <SearchForm onQuerySubmit={this.handleQuerySubmit} />
+        <SearchForm onQuerySubmit={this.handleQuerySubmit} query={this.state.query} />
         <TrackList data={this.state.data} />
-        <Pagination />
+        <Pagination onPaginate={this.handlePaginate} offset={this.state.offset}/>
       </div>
     )
   }
@@ -64,7 +69,7 @@ var GrabTracks = React.createClass({
 /**
  * Search Form
  */
- var SearchForm = React.createClass({
+var SearchForm = React.createClass({
   getInitialState: function() {
     return { query: '' };
   },
@@ -98,6 +103,9 @@ var GrabTracks = React.createClass({
  * Track List
  */
 var TrackList = React.createClass({
+  componentDidUpdate: function() {
+    window.scrollTo( 0, 0 );
+  },
   render: function() {
 
     var trackNodes = this.props.data.map(function(track) {
@@ -142,10 +150,16 @@ var Pagination = React.createClass({
   getInitialState: function() {
     return { offset: 0 }
   },
+  handlePaginate( event ) {
+    event.preventDefault();
+    var offset = this.state.offset + 10;
+    this.setState({ offset: offset });
+    this.props.onPaginate({ offset: offset });
+  },
   render: function() {
     return (
       <div className="pagination">
-        <a href="#" className="paginaton-next">More Results</a>
+        <a href="#" className="paginaton-next" onClick={this.handlePaginate}>More Results</a>
       </div>
     )
   }
@@ -157,4 +171,3 @@ ReactDOM.render(
   <GrabTracks />,
   document.getElementById('app')
 );
-
