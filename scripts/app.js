@@ -55,6 +55,7 @@ var GrabTracks = React.createClass({
         <h1>Grab Tracks</h1>
         <SearchForm onQuerySubmit={this.handleQuerySubmit} />
         <TrackList data={this.state.data} />
+        <Pagination />
       </div>
     )
   }
@@ -117,18 +118,38 @@ var TrackList = React.createClass({
  * Single Track
  */
 var Track = React.createClass({
-  generatePlayerURL: function() {
-
-  },
   render: function() {
     return (
       <li className="track">
         <div className="player">
-          <iframe width="100%" height="166" scrolling="no" src={"http://w.soundcloud.com/player/?url=http%3A%2F%2Fapi.soundcloud.com%2Ftracks%2F" + this.props.data.id + "&auto_play=false&show_artwork=true&&show_comments=false&show_playcount=false&buying=true"} frameBorder="0" ></iframe>
+          <iframe 
+            width="100%"
+            height="166"
+            scrolling="no"
+            src={"http://w.soundcloud.com/player/?url=http%3A%2F%2Fapi.soundcloud.com%2Ftracks%2F" + this.props.data.id + "&auto_play=false"} 
+            frameBorder="0" >
+          </iframe>
         </div>
       </li>
     )
   }
+});
+
+/**
+ * Pagination
+ */
+var Pagination = React.createClass({
+  getInitialState: function() {
+    return { offset: 0 }
+  },
+  render: function() {
+    return (
+      <div className="pagination">
+        <a href="#" className="paginaton-next">More Results</a>
+      </div>
+    )
+  }
+
 });
 
 // Render the ReactDOM
