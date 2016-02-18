@@ -7,7 +7,6 @@ var GrabTracks = React.createClass({
   apiRoot: 'https://api.soundcloud.com',
 
   apiEndpoint: function() {
-    console.log("STATE ", this.state);
     return [
       this.apiRoot,
       '/tracks.json',
@@ -51,7 +50,6 @@ var GrabTracks = React.createClass({
     });
   },
   getInitialState: function() {
-    console.log("GET INITIAL STATE");
     return { data: [], query: '', offset: 0 };
   },
   render: function() {
@@ -71,7 +69,7 @@ var GrabTracks = React.createClass({
  */
 var SearchForm = React.createClass({
   getInitialState: function() {
-    return { query: '' };
+    return { query: this.props.query };
   },
   handleQueryChange: function(event) {
     this.setState({ query: event.target.value });
@@ -148,7 +146,7 @@ var Track = React.createClass({
  */
 var Pagination = React.createClass({
   getInitialState: function() {
-    return { offset: 0 }
+    return { offset: this.props.offset }
   },
   handlePaginate( event ) {
     event.preventDefault();
